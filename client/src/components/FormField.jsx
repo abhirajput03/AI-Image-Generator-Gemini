@@ -24,7 +24,7 @@ export const FormField = ({ labelName, name, type, value, placeholder, isSurpris
         {isSurpriseMe && <>{listening ? (<>
           <button
             type="button"
-            className="outline-none bg-transparent border-none"
+             className="outline-none bg-transparent rounded-full border hover:border-[#4649ff] hover:bg-gray-100"
             onClick={SpeechRecognition.stopListening}
           >
             <img src={mute} alt="download" className="w-6 h-6 object-contain" />
