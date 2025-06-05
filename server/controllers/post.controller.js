@@ -42,8 +42,12 @@ export const createPost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
     try {
-        const posts = await Post.find().populate({ path: "user", select: "username" })
-        return res.status(200).json({ success: true, msg: "posts fetched", posts });
+        const { page = 1, limit = 4 } = req.query;
+        const skip = (page - 1) * limit;
+        const posts = await Post.find().skip(skip).limit(limit).populate({ path: "user", select: "username" })
+        const totalPostCount = await Post.countDocuments();
+        const totalPages = Math.ceil(totalPostCount / limit)
+        return res.status(200).json({ success: true, msg: "posts fetched", posts, page, limit, totalPages, totalPostCount, });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ success: false, error: "Internal server error" });
