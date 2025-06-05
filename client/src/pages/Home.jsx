@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FormField, Loader, RenderCards } from '../components'
+import { FormField, Loader, Pagination, RenderCards } from '../components'
 import { usePost } from '../context/post.context'
 import { useUser } from '../context/user.context'
 
@@ -10,6 +10,14 @@ export const Home = () => {
   const { posts, setPosts } = usePost()
   const { user } = useUser()
 
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(3)
+  const [totalPages, setTotalPages] = useState(0)
+
+  const handlePageChange = (page) => {
+    setPage(page)
+  }
+
   const handleSearchChange = (e) => {
     setSearchText(e.target.value)
     const result = posts.filter((post) => {
@@ -18,25 +26,27 @@ export const Home = () => {
     setFilteredPosts(result)
   }
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch("http://localhost:8000/api/v1/post/get-all-posts")
-        const data = await response.json()
+  const fetchPosts = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch(`http://localhost:8000/api/v1/post/get-all-posts?page=${page}&limit=${limit}`)
+      const data = await response.json()
 
-        if (!response.ok) {
-          throw new Error(data.error);
-        }
-        setPosts(data.posts.reverse())
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false)
+      if (!response.ok) {
+        throw new Error(data.error);
       }
+      setTotalPages(data.totalPages)
+      setPosts(data.posts.reverse())
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchPosts()
-  }, [])
+  }, [page])
 
   return (<>
     <section className="max-w-7xl">
@@ -81,6 +91,7 @@ export const Home = () => {
           )
         }
       </div>
+      <Pagination totalPages={totalPages} handlePageChange={handlePageChange} page={page} />
     </section >
   </>
   )
